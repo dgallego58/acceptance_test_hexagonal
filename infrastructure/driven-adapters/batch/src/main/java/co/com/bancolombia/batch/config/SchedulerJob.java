@@ -8,7 +8,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -26,7 +25,7 @@ public class SchedulerJob {
         this.launcher = jobLauncher;
     }
 
-    @Scheduled(fixedDelay = 10_000L)
+    //@Scheduled(fixedDelay = 10_000L)
     public void executor() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
         var param = new JobParameter<>(LocalDate.now() + ".csv", String.class);

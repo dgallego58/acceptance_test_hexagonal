@@ -14,15 +14,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class QueuesAndTopicExchangeConfig {
 
-
     @Bean
     public TopicExchange appExchange(RabbitMQProperties rabbitMQProperties) {
-        return new TopicExchange(rabbitMQProperties.getExchanges().get(ExchangeNames.WORKER_EXC));
+        return new TopicExchange(rabbitMQProperties.getExchanges().get(ExchangeNames.WORKER_EXC),
+                false,
+                false);
     }
 
     @Bean
     public Queue appQueueGeneric(RabbitMQProperties rabbitMQProperties) {
-        return new Queue(rabbitMQProperties.getQueues().get(QueueNames.WORKER_1));
+        return new Queue(rabbitMQProperties.getQueues().get(QueueNames.WORKER_1), false);
     }
 
     @Bean

@@ -12,6 +12,10 @@ repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
 dependencies {
     testImplementation 'com.rabbitmq:amqp-client:5.18.0'
     testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"

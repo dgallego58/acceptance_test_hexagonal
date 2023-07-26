@@ -7,6 +7,3 @@ Feature: using helper java class to run karate test with rabbitmq
     * rmq.publish(queue, 'working with karate')
     * def result = rmq.msg()
     * match result == 'working with karate'
-
-
-

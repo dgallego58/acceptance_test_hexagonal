@@ -24,8 +24,9 @@ public class RabbitMQConnector {
 
     private final ConnectionFactory connectionFactory;
     private final AtomicReference<String> actualMessage;
+    private final Channel channelListener;
 
-    public RabbitMQConnector(String environment, String queue) {
+    public RabbitMQConnector(String environment, String queue) throws IOException, TimeoutException {
         this.connectionFactory = new ConnectionFactory();
         Predicate<String> isNull = Objects::isNull;
         var env = isNull.or("local"::equals).test(environment);
@@ -39,6 +40,10 @@ public class RabbitMQConnector {
         connectionFactory.setPassword(rabbitMQProperties.getPassword());
         actualMessage = new AtomicReference<>();
         log.info("Listening to queue [{}]", queue);
+
+        //el canal debe estar abierto durante toda la instancia del test,
+        // ya que la cola terminará encolada con un publisher
+        this.channelListener = connectionFactory.newConnection().createChannel();
         listenTo(queue);
     }
 
@@ -65,20 +70,19 @@ public class RabbitMQConnector {
 
 
     public void listenTo(String queue) {
-        try (Connection connection = connectionFactory.newConnection();
-             Channel channel = connection.createChannel()) {
+        try {
             log.debug("Checking messages");
-            channel.queueDeclare(queue, false, false, false, null);
+            channelListener.queueDeclare(queue, false, false, false, null);
             DeliverCallback deliverCallback = (consumerTag, message) -> {
                 var msg = new String(message.getBody(), StandardCharsets.UTF_8);
                 actualMessage.set(msg);
                 log.info("Value in Actual Message '{}'", actualMessage.get());
             };
-            var tag = channel.basicConsume(queue, true, deliverCallback, consumerTag -> {
+            var tag = channelListener.basicConsume(queue, true, deliverCallback, consumerTag -> {
             });
-
             log.info("Tag is {}", tag);
-        } catch (IOException | TimeoutException e) {
+        } catch (IOException e) {
+            log.error("fallido en listening", e);
             throw new RuntimeException(e);
         }
     }

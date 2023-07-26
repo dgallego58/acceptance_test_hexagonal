@@ -1,4 +1,5 @@
 dependencies {
+    implementation project(':apirest')
     implementation project(':batch')
     implementation project(':rabbitmq')
     implementation project(':sftp')
