@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'acceptance_text_hexagonal'
+rootProject.name = 'acceptance_test_hexagonal'
 
 include ':app-service'
 include ':model'
@@ -20,3 +20,5 @@ include ':rabbitmq'
 project(':rabbitmq').projectDir = file('./infrastructure/driven-adapters/rabbitmq')
 include ':batch'
 project(':batch').projectDir = file('./infrastructure/driven-adapters/batch')
+include ':apirest'
+project(':apirest').projectDir = file('./infrastructure/entry-points/apirest')
