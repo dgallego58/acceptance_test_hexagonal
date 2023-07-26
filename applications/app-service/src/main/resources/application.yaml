@@ -1,0 +1,43 @@
+##Spring Configuration
+server:
+  port: 8080
+spring:
+  application:
+    name: acceptance_text_hexagonal
+  h2:
+    console:
+      enabled: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    url: jdbc:h2:mem:mydb
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  rabbitmq:
+    host: localhost
+    port: 5672
+    user: guest
+    password: guest
+    exchanges:
+      worker-exc: worker.exc.1
+    queues:
+      worker-1: worker.queue.1
+    routing-keys:
+      worker-route: worker.routing.1
+  batch:
+    jdbc:
+      initialize-schema: embedded
+    job:
+      enabled: false
+sftp:
+  host: 127.0.0.1
+  port: 22
+  user: daagalle
+  privateKey: classpath:id_rsa
+  baseDirectory: /home/daagalle
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id("io.freefair.lombok") version "8.1.0"
+}
+
+ext {
+    karateVersion = "1.4.0"
+    cucumberReportVersion = "5.7.6"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'com.rabbitmq:amqp-client:5.18.0'
+    testImplementation "com.intuit.karate:karate-junit5:${karateVersion}"
+    testImplementation "net.masterthought:cucumber-reporting:${cucumberReportVersion}"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
+    testImplementation platform("software.amazon.awssdk:bom:2.20.103")
+    testImplementation 'software.amazon.awssdk:sts'
+    testImplementation 'software.amazon.awssdk:secretsmanager'
+}
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/java')
+            exclude '**/*.java'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty "karate.options", System.properties.getProperty("karate.options")
+    systemProperty "karate.env", System.properties.getProperty("karate.env")
+    outputs.upToDateWhen { false }
+}
+

@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        //mavenLocal()
+        //maven { url '...' }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'acceptance_text_hexagonal'
+
+include ':app-service'
+include ':model'
+include ':usecase'
+project(':app-service').projectDir = file('./applications/app-service')
+project(':model').projectDir = file('./domain/model')
+project(':usecase').projectDir = file('./domain/usecase')
+include ':sftp'
+project(':sftp').projectDir = file('./infrastructure/driven-adapters/sftp')
+include ':rabbitmq'
+project(':rabbitmq').projectDir = file('./infrastructure/driven-adapters/rabbitmq')
+include ':batch'
+project(':batch').projectDir = file('./infrastructure/driven-adapters/batch')

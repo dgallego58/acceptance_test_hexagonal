@@ -1,0 +1,123 @@
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+}
+
+subprojects { subProject ->
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
+
+    //compileJava.dependsOn validateStructure
+    java {
+        sourceCompatibility = '17'
+    }
+
+    idea {
+        module {
+            downloadJavadoc = true
+        }
+    }
+
+    validateStructure.enabled = false
+
+    if (subProject == project(":app-service")) {
+        jar.enabled = false
+        bootJar.enabled = true
+    } else {
+        jar.enabled = true
+        bootJar.enabled = false
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        //BASE DEPS
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-amqp'
+        implementation 'org.springframework.boot:spring-boot-starter-batch'
+        implementation 'org.springframework.boot:spring-boot-starter-integration'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        //EIP
+        implementation 'org.springframework.integration:spring-integration-sftp'
+        implementation 'org.springframework.integration:spring-integration-amqp'
+        implementation 'org.springframework.integration:spring-integration-http'
+
+        implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+        implementation 'org.flywaydb:flyway-core'
+        implementation 'org.projectlombok:lombok'
+        runtimeOnly 'com.h2database:h2'
+        //runtimeOnly 'org.postgresql:postgresql'
+
+        implementation platform('software.amazon.awssdk:bom:2.20.109')
+        implementation 'software.amazon.awssdk:s3'
+        implementation 'software.amazon.awssdk:sts'
+
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testImplementation 'org.springframework.amqp:spring-rabbit-test'
+        testImplementation 'org.springframework.batch:spring-batch-test'
+        testImplementation 'org.springframework.integration:spring-integration-test'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+/*    tasks.withType(Test).configureEach {
+        if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
+            jvmArgs += [
+                    "-XX:+AllowRedefinitionToAddDeleteMethods"
+            ]
+        }
+    }*/
+
+    test.finalizedBy(project.tasks.jacocoTestReport)
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.setRequired true
+            xml.setOutputLocation file("${buildDir}/reports/jacoco.xml")
+            csv.setRequired false
+            html.setOutputLocation file("${buildDir}/reports/jacocoHtml")
+        }
+    }
+
+}
+
+jacoco {
+    reportsDirectory.fileValue(file("$buildDir/reports"))
+}
+
+tasks.register('jacocoMergedReport', JacocoReport) {
+    dependsOn = subprojects.jacocoTestReport
+    additionalSourceDirs.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.setFrom files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.setFrom files(subprojects.sourceSets.main.output)
+    executionData.setFrom project.fileTree(dir: '.', include: '**/build/jacoco/test.exec')
+    reports {
+        xml.setRequired true
+        csv.setRequired false
+        html.setRequired true
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs = [
+            '-Amapstruct.suppressGeneratorTimestamp=true'
+    ]
+}
+tasks.named('wrapper') {
+    gradleVersion = '8.2.1'
+}
